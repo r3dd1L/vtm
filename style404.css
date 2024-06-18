@@ -1,0 +1,197 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,400i,700");
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+$bg: #540938;
+$ghost: #528cce;
+$heading: #e7ebf2;
+
+:root {
+  --btn-duration-slow: 2s;
+  --btn-duration-normal: 3s;
+  --btn-duration-fast: 5s;
+  --btn-default-color: #7cfc00;
+  --btn-blue-color: #00bcd4;
+  --btn-purple-color: #772aff;
+  font-family: "Inter";
+  font-size: 16px;
+  --gradient: linear-gradient(to bottom, #2eadff, #3d83ff, #7e61ff);
+  --color: #32a6ff
+}
+
+*,
+*:after,
+*:before {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  background-color: #540938;
+  font-family: 'Montserrat', sans-serif;
+}
+
+main {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: center;
+  text-align: center;
+}
+
+h1 {
+  color: $heading;
+  font-size: 12.5rem;
+  letter-spacing: .10em;
+  margin: .025em 0;
+  text-shadow: .05em .05em 0 rgba(0,0,0,.25);
+  white-space: nowrap;
+  
+  @media(max-width: 30rem) {
+    font-size: 8.5rem;
+  }
+  
+  & > span {
+    animation: spooky 2s alternate infinite linear;
+    color: $ghost;
+    display: inline-block;
+  }
+}
+
+h2 {
+  color: $heading;
+  margin-bottom: .40em;
+}
+
+p {
+  color: #ccc;
+  margin-top: 0;
+}
+
+@keyframes spooky {
+  from {
+    transform: translatey(.15em) scaley(.95);
+  }
+  
+  to {
+    transform: translatey(-.15em);
+  }
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+.notifications {
+  width: 18rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  margin: 0.5rem;
+}
+
+.noti {
+  position: relative;
+  height: 0;
+  transition: height 300ms ease;
+  flex-shrink: 0;
+  opacity: 1;
+}
+.noti.out {animation: notiOut 500ms ease forwards}
+@keyframes notiOut {
+  to {height: 0;}
+}
+
+.noticard {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+  width: 18rem;
+  d-height: 8rem;
+  background: #29292c;
+  border-radius: 1rem;
+  overflow: hidden;
+  animation: notiCardIn 500ms ease;
+}
+@keyframes notiCardIn {
+  from {
+    transform: translateX(50%);
+    opacity: 0;
+  }
+}
+.noti.out .noticard {animation: notiCardOut 500ms ease forwards}
+@keyframes notiCardOut {
+  to {
+    opacity: 0;
+    transform: scale(0.5)
+  }
+}
+.noticard:before {
+  position: absolute;
+  content: "";
+  inset: 0.0625rem;
+  border-radius: 0.9375rem;
+  background: #18181b;
+  z-index: 2
+}
+.noticard:after {
+  position: absolute;
+  content: "";
+  width: 0.25rem;
+  inset: 0.65rem auto 0.65rem 0.5rem;
+  border-radius: 0.125rem;
+  background: var(--gradient);
+  transition: transform 300ms ease;
+  z-index: 4;
+}
+
+.noticard:hover:after {
+  transform: translateX(0.15rem)
+}
+
+.notititle {
+  color: var(--color);
+  padding: 0.65rem 0.5rem 0.4rem 1.25rem;
+  font-weight: 500;
+  font-size: 1.1rem;
+  transition: transform 300ms ease;
+  z-index: 5;
+}
+.noti:hover .notititle {
+  transform: translateX(0.15rem)
+}
+.notidesc {
+  color: #99999d;
+  padding: 0 0.5rem 0.85rem 1.25rem;
+  transition: transform 300ms ease;
+  z-index: 5;
+}
+.noti:hover .notidesc {
+  transform: translateX(0.25rem)
+}
+
+.notiglow, .notiborderglow {
+  position: absolute;
+  width: 20rem;
+  height: 20rem;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle closest-side at center, white, transparent);
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+.notiglow { z-index: 3; }
+.notiborderglow { z-index: 1; }
+
+.noti:hover .notiglow {opacity: 0.1}
+.noti:hover .notiborderglow {opacity: 0.1}

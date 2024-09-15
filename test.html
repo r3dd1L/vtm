@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vape Shop</title>
+    <style>
+        /* Стили для навигационного блока */
+        .nav-container {
+            display: flex;
+            align-items: center;
+            space-x-8: 8px;
+        }
+
+        /* Стили для навигационных ссылок */
+        .nav-link {
+            position: relative;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 0;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #E730CA;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 2.5px;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 1.5px;
+            width: 0;
+            background-color: white;
+            transition: width 0.5s;
+        }
+
+        .nav-link:hover::before {
+            width: 100%;
+        }
+
+        /* Стили для активной ссылки */
+        .active-link {
+            color: #E730CA;
+        }
+
+        .active-link::before {
+            width: 100%;
+        }
+
+        /* Стили для меню */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: rgba(128, 128, 128, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #E730CA;
+            z-index: 10;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            margin: 5px 0;
+            color: white;
+            text-align: center;
+            padding: 5px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: rgba(231, 48, 202, 0.3);
+            color: #E730CA;
+        }
+
+        /* Стили для анимации меню */
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Стили для контента */
+        .content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .content.show {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex">
+        <div class="logo flex flex-shrink-0 items-center text-white hover:text-[#E730CA] transition-colors">
+            <img src="img/logo.png" alt="Логотип" width="80" height="80" class="logo-svg transform hover:transition-transform duration-700" style="transform-style: preserve-3d">
+        </div>
+    </div>
+    <!-- кнопкі угорі -->
+    <div class="nav-container hidden min-[845px]:flex sm:space-x-8">
+        <a href="./index.html" class="nav-link active-link" aria-current="page">Головна</a>
+        <div class="relative">
+            <a href="#" class="nav-link" id="projects-link">Проєкти</a>
+            <div class="dropdown-menu" id="projects-menu">
+                <a href="https://test.com" target="_blank">Магазин</a>
+                <a href="https://test.com" target="_blank">Барахолка</a>
+                <a href="https://test.com" target="_blank">Чат</a>
+            </div>
+        </div>
+        <a href="#" class="nav-link" id="about-link">Про нас</a>
+        <a href="https://t.me/VapeMiracleSupportBot" class="nav-link">Зв'язок з нами</a>
+    </div>
+    <!-- Контент -->
+    <div class="content" id="about-content">Про нас тут</div>
+
+    <script>
+        document.getElementById('projects-link').addEventListener('click', function (event) {
+            event.preventDefault();
+            const menu = document.getElementById('projects-menu');
+            menu.classList.toggle('show');
+        });
+
+        document.getElementById('about-link').addEventListener('click', function (event) {
+            event.preventDefault();
+            // Скрываем текущий контент
+            document.querySelector('.content').classList.remove('show');
+            // Плавно показываем новый контент
+            setTimeout(() => {
+                document.getElementById('about-content').classList.add('show');
+            }, 10);
+
+            // Перемещаем активную ссылку
+            document.querySelector('.nav-link.active-link').classList.remove('active-link');
+            event.currentTarget.classList.add('active-link');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Розрахунок доставки</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #000;
+            color: #fff;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-transform: uppercase;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 30px #00ffcc, 0 0 40px #00ffcc;
+        }
+        .form-group {
+            margin-bottom: 1em;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1000; /* Ensure suggestions are on top */
+        }
+        label {
+            margin-bottom: 5px;
+            font-size: 1.2em;
+        }
+        input {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            width: 300px;
+            font-size: 1em;
+            background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff80, #00ffff, #0080ff, #ff00ff, #ff0080, #ff0000);
+            background-size: 400% 400%;
+            animation: gradient 5s infinite;
+            color: #000;
+            outline: none;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .suggestions {
+            border: 1px solid #00ffcc;
+            border-top: none;
+            max-height: 150px;
+            overflow-y: auto;
+            width: 100%;
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7); /* Dark transparent background */
+            z-index: 1000;
+            top: 100%; /* Position below the input */
+            left: 0;
+            border-radius: 0 0 4px 4px; /* Rounded corners for the bottom */
+        }
+        .suggestion {
+            padding: 8px;
+            cursor: pointer;
+            color: #00ffcc;
+            border-bottom: 1px solid #00ffcc;
+        }
+        .suggestion:hover {
+            background-color: #00ffcc;
+            color: #000;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: transparent;
+            color: #00ffcc;
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff80, #00ffff, #0080ff, #ff00ff, #ff0080, #ff0000) 1;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            transition: background-color 0.3s, color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 1em;
+            border: 2px solid #00ffcc;
+            border-radius: 4px;
+        }
+        #deliveryCost {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .modal-content {
+            background-color: #000;
+            margin: 15% auto;
+            padding: 20px;
+            border: 2px solid #00ffcc;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+        }
+        .close {
+            color: #00ffcc;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Розрахунок доставки</h1>
+    <div class="form-group">
+        <label for="address">Адреса:</label>
+        <input type="text" id="address" name="address" required oninput="debounceSearch()">
+        <div id="suggestions" class="suggestions"></div>
+    </div>
+    <div id="map"></div>
+    <button onclick="calculateDelivery()">Розрахувати</button>
+    <div id="deliveryCost"></div>
+    <div id="deliveryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <p id="modalText"></p>
+        </div>
+    </div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script>
+        const debounce = (func, delay) => {
+            let debounceTimer;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => func.apply(context, args), delay);
+            };
+        };
+
+        const geocoder = new L.Control.Geocoder.Nominatim();
+        const map = L.map('map').setView([50.4501, 30.5234], 13); // Центр Киева
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        function searchAddress() {
+            const address = document.getElementById('address').value.trim();
+            if (address.length < 3) {
+                clearSuggestions();
+                return;
+            }
+
+            geocoder.geocode(address, function(results) {
+                if (results && results.length > 0) {
+                    const suggestions = document.getElementById('suggestions');
+                    suggestions.innerHTML = '';
+                    results.forEach(result => {
+                        const suggestion = document.createElement('div');
+                        suggestion.className = 'suggestion';
+                        suggestion.innerText = result.name;
+                        suggestion.onclick = () => selectSuggestion(result);
+                        suggestions.appendChild(suggestion);
+                    });
+                } else {
+                    clearSuggestions();
+                }
+            });
+        }
+
+        const debounceSearch = debounce(searchAddress, 300);
+
+        function clearSuggestions() {
+            const suggestions = document.getElementById('suggestions');
+            suggestions.innerHTML = '';
+        }
+
+        function selectSuggestion(result) {
+            document.getElementById('address').value = result.name;
+            clearSuggestions();
+            map.setView(result.center, 15);
+            L.marker(result.center).addTo(map);
+        }
+
+        function calculateDelivery() {
+            const address = document.getElementById('address').value.trim();
+
+            if (!address) {
+                alert('Будь ласка, заповніть поле адреси.');
+                return;
+            }
+
+            geocoder.geocode(address, function(results) {
+                if (results && results.length > 0) {
+                    const result = results[0];
+                    map.setView(result.center, 15);
+                    L.marker(result.center).addTo(map);
+                    showModal('Ваша доставка вийде: 70грн');
+                } else {
+                    alert('Не вдалося знайти адресу');
+                }
+            });
+        }
+
+        function showModal(message) {
+            document.getElementById('modalText').innerText = message;
+            document.getElementById('deliveryModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('deliveryModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('deliveryModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

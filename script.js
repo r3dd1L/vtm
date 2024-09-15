@@ -1,3 +1,9 @@
+document.getElementById('projects-link').addEventListener('click', function (event) {
+    event.preventDefault();
+    const menu = document.getElementById('projects-menu');
+    menu.classList.toggle('show');
+});
+
 window.addEventListener('load', function() {
     var preloader = document.getElementById('preloader');
     document.body.classList.remove('no-scroll');
@@ -151,3 +157,18 @@ setInterval(()=>{
   }
   i++
 }, 4000)
+
+window.onload = function() {
+  document.getElementById('cookieModal').style.display = 'flex';
+  document.body.classList.add('modal-active');
+};
+
+function acceptCookies() {
+  document.getElementById('cookieModal').style.display = 'none';
+  document.body.classList.remove('modal-active');
+}
+
+function declineCookies() {
+  window.close();
+}
+

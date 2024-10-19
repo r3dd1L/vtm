@@ -195,3 +195,62 @@ p {
 
 .noti:hover .notiglow {opacity: 0.1}
 .noti:hover .notiborderglow {opacity: 0.1}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.social-icon {
+  font-size: 40px;
+  color: #333;
+  transition: color 0.3s;
+}
+
+.social-icon:hover {
+  color: #007bff; /* Цвет при наведении */
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 60px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  p {
+    font-size: 16px;
+  }
+
+  .social-icon {
+    font-size: 35px;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 50px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  p {
+    font-size: 14px;
+  }
+
+  .social-icons {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .social-icon {
+    font-size: 30px;
+  }
+}

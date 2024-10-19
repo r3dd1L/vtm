@@ -171,4 +171,3 @@ function acceptCookies() {
 function declineCookies() {
   window.close();
 }
-
